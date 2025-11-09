@@ -11,7 +11,6 @@ export default function App() {
     isLoading,
     currentBirdAnimation,
     birdMetrics,
-    userProgress,
     getCurrentWord,
     answerWord,
     initializeApp,
@@ -55,6 +54,11 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
       
+      {/* Metrics Display - Top */}
+      <MetricsDisplay
+        birdMetrics={birdMetrics}
+      />
+
       {/* Bird Animation Area */}
       <View style={styles.birdArea}>
         <AnimatedBird
@@ -65,12 +69,6 @@ export default function App() {
           size={80}
         />
       </View>
-
-      {/* Metrics Display */}
-      <MetricsDisplay
-        birdMetrics={birdMetrics}
-        userProgress={userProgress}
-      />
 
       {/* Learning Area */}
       <View style={styles.learningArea}>
@@ -115,6 +113,7 @@ const styles = StyleSheet.create({
     height: 200,
     backgroundColor: 'transparent',
     position: 'relative',
+    overflow: 'hidden',
   },
   learningArea: {
     flex: 1,

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
+import { View, StyleSheet, Animated, Dimensions } from 'react-native';
 import BirdSprite from './BirdSprite';
 import { BirdAnimationState } from '../types';
 
@@ -19,6 +19,7 @@ const AnimatedBird: React.FC<AnimatedBirdProps> = ({
   size = 64,
 }) => {
   const [currentFrame, setCurrentFrame] = useState(0);
+  // Initialize horizontal position to 0 (center of container)
   const horizontalPosition = useRef(new Animated.Value(0)).current;
   const verticalBob = useRef(new Animated.Value(0)).current;
 
@@ -65,12 +66,15 @@ const AnimatedBird: React.FC<AnimatedBirdProps> = ({
 
   // Horizontal movement (constant speed based on distance)
   useEffect(() => {
-    const screenWidth = 400; // Approximate screen width
+    const { width: screenWidth } = Dimensions.get('window');
     const cycleDistance = 200; // Distance for one complete cycle
     const position = (distance % cycleDistance) / cycleDistance;
+    // Keep bird visible: use -30% to +30% of screen width from center
+    const maxOffset = screenWidth * 0.3;
+    const xOffset = (position - 0.5) * 2 * maxOffset; // Range: -maxOffset to +maxOffset
     
     Animated.timing(horizontalPosition, {
-      toValue: position * screenWidth,
+      toValue: xOffset,
       duration: 1000,
       useNativeDriver: true,
     }).start();
@@ -115,10 +119,12 @@ const AnimatedBird: React.FC<AnimatedBirdProps> = ({
   // Calculate vertical position based on altitude
   const getVerticalPosition = () => {
     if (animationState === 'hop') {
-      return 0; // Ground level
+      return 150; // Ground level (near bottom of container)
     }
     // Map altitude (0-100) to screen position (higher altitude = higher on screen)
-    return -(altitude * 2); // Negative because Y increases downward
+    // Invert: higher altitude = lower translateY value (closer to top)
+    // Range: 150 (bottom) to 20 (top)
+    return 150 - (altitude * 1.3); // Negative because Y increases downward
   };
 
   return (
@@ -127,6 +133,8 @@ const AnimatedBird: React.FC<AnimatedBirdProps> = ({
         style={[
           styles.birdContainer,
           {
+            left: '50%',
+            marginLeft: -size / 2, // Center the bird horizontally
             transform: [
               { translateX: horizontalPosition },
               { translateY: getVerticalPosition() },
@@ -149,7 +157,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     overflow: 'hidden',
   },
   birdContainer: {
